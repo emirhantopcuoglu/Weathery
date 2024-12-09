@@ -1,0 +1,71 @@
+appsettings.json
+
+# Tüm wwwroot klasörünü hariç tut
+wwwroot/
+
+## Windows işletim sistemi dosyaları
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+## Visual Studio dosyaları
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+## Build sonuçları
+bin/
+obj/
+*.dll
+*.pdb
+*.exe
+*.appx
+*.dbmdl
+*.log
+*.jfm
+
+## Paket yönetim dosyaları
+node_modules/
+bower_components/
+
+## ASP.NET yayınlama dosyaları
+*.publishsettings
+*.pubxml
+*.pubxml.user
+
+## Geliştirme araçları dosyaları
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+## Log ve hata raporlama dosyaları
+*.stackdump
+*.log
+*.dmp
+
+## Resharper ve benzeri araçların dosyaları
+_ReSharper*/
+*.DotSettings.user
+
+## Web yapılandırma dosyaları
+appsettings.json
+appsettings.*.json
+web.config
+web.*.config
+
+## Temp dosyalar
+*.tmp
+*.temp
+*.cache
+
+## Paket yönetimi için üretilen dosyalar
+packages/
+*.nupkg
+*.nuspec
+
+## Geriye dönük uyumluluk dosyaları
+*.csproj.user
+*.vbproj.user
