@@ -1,5 +1,80 @@
 @model WeatherInfo
-<h4>@Model.City</h4>
-<h4>@Model.Temperature</h4>
-<h4>@Model.Description</h4>
-<h4>@Model.Humidity</h4>
+
+<div class="container mt-5">
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger" role="alert">
+            @TempData["Error"]
+        </div>
+    }
+
+    <div class="card shadow-lg rounded-4 border-0">
+        <div class="card-header bg-gradient-primary text-white">
+            <ul class="nav nav-pills card-header-pills justify-content-center">
+                <li class="nav-item">
+                    <a class="nav-link active text-white" href="#">Günlük</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-secondary" href="#">Haftalık</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-secondary" href="#">Aylık</a>
+                </li>
+            </ul>
+        </div>
+        <div class="card-body bg-light text-center">
+            <h1 class="card-title display-4">@Model.City</h1>
+            <div class="mt-4">
+
+                @if((Math.Round(Model.Temperature)) <= 12)
+                {
+                    <h2 class="text-primary">
+                        <i class="bi bi-thermometer-half"></i> Sıcaklık: @(Math.Round(Model.Temperature)) °C
+                    </h2>
+                }
+                else if((Math.Round(Model.Temperature)) > 12 && (Math.Round(Model.Temperature) < 20))
+                {
+                    <h2 class="text-success">
+                        <i class="bi bi-thermometer-half"></i> Sıcaklık: @(Math.Round(Model.Temperature)) °C
+                    </h2>
+                }
+                else if((Math.Round(Model.Temperature)) > 20 && (Math.Round(Model.Temperature) < 30))
+                {
+                    <h2 class="text-warning">
+                        <i class="bi bi-thermometer-half"></i> Sıcaklık: @(Math.Round(Model.Temperature)) °C
+                    </h2>
+                }
+                else if((Math.Round(Model.Temperature)) > 30)
+                {
+                    <h2 class="text-danger">
+                        <i class="bi bi-thermometer-half"></i> Sıcaklık: @(Math.Round(Model.Temperature)) °C
+                    </h2>
+                }
+                
+                <p class="lead text-secondary">
+                    <i class="bi bi-cloud-sun"></i> Hava: @Model.Description
+                </p>
+                <p>
+                    <i class="bi bi-moisture"></i>
+                    <strong>Nem:</strong> % @Model.Humidity
+                </p>
+                <p>
+                    <i class="bi bi-wind"></i>
+                    <strong>Rüzgar Hızı:</strong> @Model.WindSpeed m/s
+                </p>
+                <p>
+                    <i class="bi bi-cloud-hail"></i>
+                    <strong>Son 1 saatteki yağış:</strong> @Model.Rain mm
+                </p>
+                <p>
+                    <i class="bi bi-sunrise"></i>
+                    <strong>Gün Doğumu:</strong> @Model.SunRise.ToString("HH:mm dd-MM-yyyy")
+                </p>
+                <p>
+                    <i class="bi bi-sunset"></i>
+                    <strong>Gün Batımı:</strong> @Model.SunSet.ToString("HH:mm dd-MM-yyyy")
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
