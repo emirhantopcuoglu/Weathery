@@ -1,0 +1,143 @@
+@model ForecastData
+
+<div class="container mt-5">
+    <h1 class="text-center text-primary mb-4">@Model.City, @Model.Country</h1>
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger text-center" role="alert">
+            @TempData["Error"]
+        </div>
+    }
+
+    <!-- 5 Günlük / 3 Saatlik Tahmin -->
+    <div class="card shadow-lg border-0 rounded-3" style="background: #f8f9fa;">
+        <div class="card-header" style="background: linear-gradient(135deg, #56ccf2, #2f80ed); border-radius: 15px 15px 0 0;">
+            <strong class="text-white">5 Günlük / 3 Saatlik Hava Tahminleri</strong>
+        </div>
+        <div class="card-body">
+            <!-- Tablo: Sütunlarda Saat, Satırlarda Tarihler -->
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover" style="border-color: #e1e5eb;">
+                    <thead>
+                        <tr>
+                            <th class="text-center" style="background-color: #f0f4f8; color: #5d6e7e; font-weight: normal;">Tarih / Saat</th>
+                            @foreach (var hour in Enumerable.Range(0, 8))
+                            {
+                                <th class="text-center" style="background-color: #f0f4f8; color: #5d6e7e; font-weight: normal;">@((hour * 3).ToString("00")):00</th>
+                            }
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var dayGroup in Model.Forecasts.GroupBy(f => f.DateTime.Date))
+                        {
+                            <tr>
+                                <td class="align-middle text-center text-dark" style="font-weight: bold; background-color: #f8f9fa;">
+                                    @dayGroup.Key.ToString("dd MMM yyyy")
+                                </td>
+
+                                @foreach (var hour in Enumerable.Range(0, 8))
+                                {
+                                    var forecast = dayGroup.FirstOrDefault(f => f.DateTime.Hour == hour * 3);
+                                    if (forecast != null)
+                                    {
+                                        <td class="text-center" style="background-color: #ffffff; padding: 12px 15px; border-radius: 10px; min-width: 140px; max-width: 140px;">
+                                            <div style="display: flex; flex-direction: column; align-items: center;">
+                                                <i class="bi bi-thermometer-half text-warning" style="font-size: 1.5rem;"></i>
+                                                <span class="d-block fs-5" style="font-weight: bold;">@(Math.Round(forecast.Temperature)) °C</span>
+                                                <div class="text-muted fs-6">@forecast.Description</div>
+                                            </div>
+                                        </td>
+                                    }
+                                    else
+                                    {
+                                        <td class="text-center text-muted" style="background-color: #f8f9fa;">-</td>
+                                    }
+                                }
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card-body {
+        padding: 20px;
+    }
+
+    .table-bordered {
+        border-width: 1px;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: rgba(0, 114, 255, 0.1);
+        cursor: pointer;
+    }
+
+    .table th, .table td {
+        text-align: center;
+        padding: 12px 15px;
+        vertical-align: middle;
+    }
+
+    .table th {
+        background-color: #f0f4f8;
+        color: #5d6e7e;
+        font-weight: normal;
+        border-bottom: 1px solid #e1e5eb;
+    }
+
+    .table td {
+        background-color: #ffffff;
+        border: 1px solid #e1e5eb;
+    }
+
+    .table-striped tbody tr:nth-child(odd) {
+        background-color: #f9f9f9;
+    }
+
+    .table td div {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .table td i {
+        font-size: 1.5rem;
+        color: #ffb300;
+    }
+
+    .text-muted {
+        font-size: 0.9rem;
+    }
+
+    .table td span {
+        font-weight: bold;
+        font-size: 1.2rem;
+        color: #0072ff;
+    }
+
+    tr:hover {
+        background-color: #f1f1f1;
+        cursor: pointer;
+    }
+
+    /* Yumuşak gölgeler ve pürüzsüz geçişler */
+    .card-body {
+        transition: background-color 0.3s ease;
+    }
+
+    .card-body:hover {
+        background-color: #fafafa;
+        box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Kartlardaki kutucuklar için sabit boyut */
+    .table td {
+        min-width: 140px;
+        max-width: 140px;
+    }
+</style>

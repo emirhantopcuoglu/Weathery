@@ -14,21 +14,33 @@
 
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm border-bottom box-shadow mb-3" style="background-color: #007bff;">
+        <nav class="navbar navbar-expand-sm border-bottom box-shadow mb-3" style="background: linear-gradient(135deg, #4e73df, #1cc88a); ">
             <div class="container-fluid">
                 <a class="navbar-brand text-white" href="/" style="font-weight: bold;">
                     Weathery <i class="bi bi-cloud-sun-fill"></i></a>
 
-                <form class="d-flex ms-auto" method="get" asp-controller="WeatherInfo" asp-action="Index">
-                    <input class="form-control me-2" type="text" name="city" placeholder="Şehir ismi giriniz"
-                        aria-label="Search" required>
-                    <button class="btn btn-light" type="submit">Ara</button>
-                </form>
+                    <form class="d-flex ms-auto" method="get" action="@Context.Request.Path">
+                        <input class="form-control me-2" type="text" name="city" placeholder="Şehir ismi giriniz" aria-label="Search" required>
+                        <button class="btn btn-light" type="submit">Ara</button>
+                    </form>
+                    
+                    
                 
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse"
                     aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
+
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item">
+                            <a class="nav-link text-white" aria-current="page" href="@Url.Action("Index", "WeatherInfo")">Anasayfa</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="@Url.Action("Index", "Forecast")">5 Günlük Tahmin</a>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </nav>
     </header>

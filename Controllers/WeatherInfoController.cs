@@ -1,7 +1,5 @@
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 using Weathery.Models;
 namespace Weathery.Controllers
 {
@@ -71,7 +69,9 @@ namespace Weathery.Controllers
 
                         SunRise = UnixTimeToDateTime(sunriseUnix),
 
-                        SunSet = UnixTimeToDateTime(sunsetUnix)
+                        SunSet = UnixTimeToDateTime(sunsetUnix),
+                        
+                        Date = DateTime.Now
                     };
                 }
                 catch (Exception ex)
@@ -79,10 +79,6 @@ namespace Weathery.Controllers
 
                     return null;
                 }
-
-
-
-
             }
         }
         public static DateTime UnixTimeToDateTime(double unixTime)

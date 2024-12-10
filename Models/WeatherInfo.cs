@@ -11,8 +11,8 @@ namespace Weathery.Models
         public double Rain { get; set; }
         public DateTime SunRise { get; set; }
         public DateTime SunSet { get; set; }
-
+        public DateTime Date { get; set; }
     }
 
-    
+
 }
