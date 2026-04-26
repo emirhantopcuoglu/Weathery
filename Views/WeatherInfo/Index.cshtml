@@ -1,109 +1,102 @@
 @model WeatherInfo
 @{
-    ViewData["Title"] = "Anlık Hava Durumu";
+    ViewData["Title"] = Model?.City ?? "Anlık Hava Durumu";
     var trCulture = new System.Globalization.CultureInfo("tr-TR");
+    if (Model != null)
+    {
+        ViewData["WeatherCondition"] = WeatherDisplay.ConditionClass(Model.Condition, Model.Icon).Replace("weather-", "");
+    }
 }
-<link rel="stylesheet" href="~/css/styles.css" />
-<div class="container mt-5">
-    @if (TempData["Error"] != null)
-    {
-        <div class="alert alert-danger" role="alert">
-            @TempData["Error"]
+
+@if (TempData["Error"] != null)
+{
+    <div class="weathery-alert">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        <span>@TempData["Error"]</span>
+    </div>
+}
+
+@if (Model == null)
+{
+    <div class="glass weather-hero">
+        <p class="text-center text-muted mb-0">Görüntülenecek veri yok. Yukarıdan bir şehir aratın.</p>
+    </div>
+    return;
+}
+
+<section class="glass weather-hero">
+    <div class="weather-hero-top">
+        <div>
+            <h1 class="weather-city">
+                @Model.City<span class="country">@Model.Country</span>
+            </h1>
+            <div class="weather-date">@Model.Date.ToString("d MMMM yyyy, dddd", trCulture)</div>
         </div>
-    }
-
-    @if (Model != null)
-    {
-        <div class="card shadow-lg rounded-4 border-0">
-            <div class="card-header" style="background-color: @WeatherDisplay.BackgroundColor(Model.Temperature);">
-                <div class="d-flex justify-content-between align-items-center">
-                    <h3 class="text-white">@Model.City</h3>
-                    <h3 class="text-white">@Model.Date.ToString("d MMMM yyyy dddd", trCulture)</h3>
-                </div>
-            </div>
-
-            <div class="card-body">
-                <div class="row g-4">
-                    <div class="col-sm-6 col-md-3">
-                        <div class="card p-3 rounded-3 shadow-sm">
-                            <h5 class="text-center text-primary">
-                                <i class="bi bi-thermometer-half weather-icon"
-                                   style="color: @WeatherDisplay.TemperatureIconColor(Model.Temperature);"></i>
-                                <br>
-                                <strong>Sıcaklık</strong>
-                            </h5>
-                            <p class="text-center weather-value">@(Math.Round(Model.Temperature)) °C</p>
-                        </div>
-                    </div>
-
-                    <div class="col-sm-6 col-md-3">
-                        <div class="card p-3 rounded-3 shadow-sm">
-                            <h5 class="text-center text-secondary">
-                                <img src="@WeatherDisplay.IconUrl(Model.Icon)" alt="Hava Durumu" class="weather-img">
-                                <br>
-                                <strong>Hava Durumu</strong>
-                            </h5>
-                            <p class="text-center lead weather-text">@Model.Description</p>
-                        </div>
-                    </div>
-
-                    <div class="col-sm-6 col-md-3">
-                        <div class="card p-3 rounded-3 shadow-sm">
-                            <h5 class="text-center text-info">
-                                <i class="bi bi-moisture weather-icon"></i>
-                                <br>
-                                <strong>Nem</strong>
-                            </h5>
-                            <p class="text-center lead weather-text">% @Model.Humidity</p>
-                        </div>
-                    </div>
-
-                    <div class="col-sm-6 col-md-3">
-                        <div class="card p-3 rounded-3 shadow-sm">
-                            <h5 class="text-center text-warning">
-                                <i class="bi bi-wind weather-icon"
-                                   style="color: @WeatherDisplay.WindIconColor(Model.WindSpeed);"></i>
-                                <br>
-                                <strong>Rüzgar</strong>
-                            </h5>
-                            <p class="text-center lead weather-text">@Model.WindSpeed m/s</p>
-                        </div>
-                    </div>
-
-                    <div class="col-sm-6 col-md-3">
-                        <div class="card p-3 rounded-3 shadow-sm">
-                            <h5 class="text-center text-primary">
-                                <i class="bi bi-cloud-hail weather-icon"></i>
-                                <br>
-                                <strong>Yağış</strong>
-                            </h5>
-                            <p class="text-center lead weather-text">@Model.Rain mm</p>
-                        </div>
-                    </div>
-
-                    <div class="col-sm-6 col-md-3">
-                        <div class="card p-3 rounded-3 shadow-sm">
-                            <h5 class="text-center text-success">
-                                <i class="bi bi-sunrise weather-icon"></i>
-                                <br>
-                                <strong>Gün Doğumu</strong>
-                            </h5>
-                            <p class="text-center lead weather-text">@Model.SunRise.ToString("HH:mm dd-MM-yyyy")</p>
-                        </div>
-                    </div>
-
-                    <div class="col-sm-6 col-md-3">
-                        <div class="card p-3 rounded-3 shadow-sm">
-                            <h5 class="text-center text-danger">
-                                <i class="bi bi-sunset weather-icon"></i>
-                                <br>
-                                <strong>Gün Batımı</strong>
-                            </h5>
-                            <p class="text-center lead weather-text">@Model.SunSet.ToString("HH:mm dd-MM-yyyy")</p>
-                        </div>
-                    </div>
-                </div>
+        <div class="text-end">
+            <div class="weather-desc">@Model.Description</div>
+            <div class="weather-feels">Hissedilen <strong>@Math.Round(Model.FeelsLike) °C</strong></div>
+            <div class="weather-range">
+                <i class="bi bi-arrow-down"></i> @Math.Round(Model.TempMin)°
+                &nbsp;<i class="bi bi-arrow-up"></i> @Math.Round(Model.TempMax)°
             </div>
         </div>
-    }
-</div>
+    </div>
+
+    <div class="weather-hero-main">
+        <img class="weather-icon-big" src="@WeatherDisplay.IconUrl(Model.Icon)" alt="@Model.Description">
+        <div class="weather-temp">
+            <span data-count data-value="@Math.Round(Model.Temperature)" data-suffix="">@Math.Round(Model.Temperature)</span>
+            <span class="unit">°C</span>
+        </div>
+    </div>
+</section>
+
+<section class="detail-grid">
+    <div class="glass detail-card">
+        <span class="detail-label"><i class="bi bi-droplet-half"></i> Nem</span>
+        <span class="detail-value"><span data-count data-value="@Model.Humidity" data-suffix="%">@Model.Humidity%</span></span>
+        <span class="detail-sub">Bağıl nem oranı</span>
+    </div>
+
+    <div class="glass detail-card">
+        <span class="detail-label"><i class="bi bi-wind"></i> Rüzgar</span>
+        <span class="detail-value">@Model.WindSpeed.ToString("0.#") m/s</span>
+        <span class="detail-sub">@WeatherDisplay.WindDirection(Model.WindDeg) yönünden</span>
+    </div>
+
+    <div class="glass detail-card">
+        <span class="detail-label"><i class="bi bi-speedometer2"></i> Basınç</span>
+        <span class="detail-value">@Model.Pressure.ToString("0") hPa</span>
+        <span class="detail-sub">Atmosferik basınç</span>
+    </div>
+
+    <div class="glass detail-card">
+        <span class="detail-label"><i class="bi bi-eye"></i> Görüş</span>
+        <span class="detail-value">@Model.VisibilityKm.ToString("0.#") km</span>
+        <span class="detail-sub">Görüş mesafesi</span>
+    </div>
+
+    <div class="glass detail-card">
+        <span class="detail-label"><i class="bi bi-cloud-rain"></i> Yağış</span>
+        <span class="detail-value">@Model.Rain.ToString("0.#") mm</span>
+        <span class="detail-sub">Son 1 saat</span>
+    </div>
+
+    <div class="glass detail-card">
+        <span class="detail-label"><i class="bi bi-sunrise"></i> Gün Doğumu</span>
+        <span class="detail-value">@Model.SunRise.ToString("HH:mm")</span>
+        <span class="detail-sub">@Model.SunRise.ToString("d MMM", trCulture)</span>
+    </div>
+
+    <div class="glass detail-card">
+        <span class="detail-label"><i class="bi bi-sunset"></i> Gün Batımı</span>
+        <span class="detail-value">@Model.SunSet.ToString("HH:mm")</span>
+        <span class="detail-sub">@Model.SunSet.ToString("d MMM", trCulture)</span>
+    </div>
+
+    <div class="glass detail-card">
+        <span class="detail-label"><i class="bi bi-geo-alt"></i> Konum</span>
+        <span class="detail-value">@Model.Latitude.ToString("0.##"), @Model.Longitude.ToString("0.##")</span>
+        <span class="detail-sub">Enlem / Boylam</span>
+    </div>
+</section>

@@ -1,70 +1,74 @@
 @model ForecastData
 @{
-    ViewData["Title"] = "5 Günlük Tahmin";
-    const int slotCount = 8;
-    const int hoursPerSlot = 3;
+    ViewData["Title"] = Model != null ? $"{Model.City} · 5 Günlük Tahmin" : "5 Günlük Tahmin";
+    var trCulture = new System.Globalization.CultureInfo("tr-TR");
+    if (Model?.Daily.FirstOrDefault() is { } first)
+    {
+        ViewData["WeatherCondition"] = WeatherDisplay.ConditionClass(first.Condition, first.Icon).Replace("weather-", "");
+    }
 }
-<link rel="stylesheet" href="~/css/forecast_styles.css" />
-<div class="container mt-5">
-    @if (TempData["Error"] != null)
-    {
-        <div class="alert alert-danger text-center" role="alert">
-            @TempData["Error"]
-        </div>
-    }
 
-    @if (Model != null)
-    {
-        <h1 class="text-center text-primary mb-4">@Model.City, @Model.Country</h1>
+@if (TempData["Error"] != null)
+{
+    <div class="weathery-alert">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        <span>@TempData["Error"]</span>
+    </div>
+}
 
-        <div class="card shadow-lg border-0 rounded-3 forecast-card">
-            <div class="card-header forecast-header">
-                <strong class="text-white">5 Günlük / 3 Saatlik Hava Tahminleri</strong>
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-bordered table-hover forecast-table">
-                        <thead>
-                            <tr>
-                                <th class="text-center forecast-th">Tarih / Saat</th>
-                                @foreach (var hour in Enumerable.Range(0, slotCount))
-                                {
-                                    <th class="text-center forecast-th">@((hour * hoursPerSlot).ToString("00")):00</th>
-                                }
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var dayGroup in Model.Forecasts.GroupBy(f => f.DateTime.Date))
-                            {
-                                <tr>
-                                    <td class="align-middle text-center text-dark forecast-day">
-                                        @dayGroup.Key.ToString("dd MMM yyyy")
-                                    </td>
+@if (Model == null)
+{
+    <div class="glass forecast-section">
+        <p class="text-center text-muted mb-0">Görüntülenecek tahmin yok. Yukarıdan bir şehir aratın.</p>
+    </div>
+    return;
+}
 
-                                    @foreach (var hour in Enumerable.Range(0, slotCount))
-                                    {
-                                        var forecast = dayGroup.FirstOrDefault(f => f.DateTime.Hour == hour * hoursPerSlot);
-                                        if (forecast != null)
-                                        {
-                                            <td class="text-center forecast-cell">
-                                                <div class="forecast-cell-content">
-                                                    <i class="bi bi-thermometer-half text-warning forecast-icon"></i>
-                                                    <span class="d-block fs-5 forecast-temp">@(Math.Round(forecast.Temperature)) °C</span>
-                                                    <div class="text-muted fs-6">@forecast.Description</div>
-                                                </div>
-                                            </td>
-                                        }
-                                        else
-                                        {
-                                            <td class="text-center text-muted forecast-empty">-</td>
-                                        }
-                                    }
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
+<section class="glass forecast-section">
+    <h2 class="forecast-title">
+        <i class="bi bi-calendar3 me-2"></i>@Model.City, @Model.Country — Günlük Özet
+    </h2>
+
+    <div class="daily-grid">
+        @{ int dayIndex = 0; }
+        @foreach (var day in Model.Daily)
+        {
+            var dateKey = day.Date.ToString("yyyy-MM-dd");
+            <div class="glass day-card" data-date="@dateKey" style="animation-delay: @(dayIndex * 60)ms">
+                <div class="day-name">@day.Date.ToString("dddd", trCulture)</div>
+                <div class="day-date">@day.Date.ToString("d MMM", trCulture)</div>
+                <img src="@WeatherDisplay.IconUrl(day.Icon)" alt="@day.Description">
+                <div class="day-temps">
+                    <span class="day-max">@Math.Round(day.TempMax)°</span>
+                    <span class="day-min">@Math.Round(day.TempMin)°</span>
                 </div>
+                <div class="day-desc">@day.Description</div>
             </div>
-        </div>
-    }
-</div>
+            dayIndex++;
+        }
+    </div>
+
+    <h2 class="forecast-title">
+        <i class="bi bi-clock me-2"></i>3 Saatlik Detay
+    </h2>
+
+    <div data-hourly-strips>
+        @foreach (var day in Model.Daily)
+        {
+            var dateKey = day.Date.ToString("yyyy-MM-dd");
+            <div class="hourly-strip" data-strip-for="@dateKey">
+                @{ int slotIndex = 0; }
+                @foreach (var slot in day.Slots)
+                {
+                    <div class="glass hour-card" style="animation-delay: @(slotIndex * 40)ms">
+                        <div class="hour-time">@slot.DateTime.ToString("HH:mm")</div>
+                        <img src="@WeatherDisplay.IconUrl(slot.Icon)" alt="@slot.Description">
+                        <div class="hour-temp">@Math.Round(slot.Temperature)°</div>
+                        <div class="day-desc">@slot.Description</div>
+                    </div>
+                    slotIndex++;
+                }
+            </div>
+        }
+    </div>
+</section>
