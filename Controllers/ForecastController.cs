@@ -32,7 +32,7 @@ namespace Weathery.Controllers
 
         private async Task<ForecastData> GetForecastDataAsync(string city)
         {
-            var apiKey = _configuration["WeatherApiKey"];  // API anahtarınız
+            var apiKey = _configuration["WeatherApiKey"];
 
             using (var client = new HttpClient())
             {

@@ -3,6 +3,8 @@ namespace Weathery.Models
     public class WeatherInfo
     {
         public string? City { get; set; }
+        public double Latitude { get; set; }
+        public double Longitude { get; set; }
         public string? Icon { get; set; }
         public double Temperature { get; set; }
         public string? Description { get; set; }
@@ -12,6 +14,7 @@ namespace Weathery.Models
         public DateTime SunRise { get; set; }
         public DateTime SunSet { get; set; }
         public DateTime Date { get; set; }
+
     }
 
 

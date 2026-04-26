@@ -1,5 +1,5 @@
 @model WeatherInfo
-
+<link rel="stylesheet" href="~/css/styles.css" />
 <div class="container mt-5">
     @if (TempData["Error"] != null)
     {
@@ -7,126 +7,138 @@
         @TempData["Error"]
     </div>
     }
-    <div class="container mt-5">
-        <div class="card shadow-lg rounded-4 border-0">
-            <!-- Kart Başlığı -->
-            <div class="card-header" style="background: linear-gradient(135deg, #01bff4, #b037b7);">
-                <div class="d-flex justify-content-between align-items-center">
-                    <!-- Sol Köşe: Şehir Adı -->
-                    <h3 class="text-white">@Model.City</h3>
 
-                    <!-- Sağ Köşe: Tarih -->
-                    <h3 class="text-white">@Model.Date.ToString("d MMMM yyyy dddd", new
-                        System.Globalization.CultureInfo("tr-TR"))</h3>
-                </div>
+    <div class="card shadow-lg rounded-4 border-0">
+        <!-- Kart Başlığı -->
+        <div class="card-header" style="background-color: @GetBackgroundColor(Model.Temperature);">
+            <div class="d-flex justify-content-between align-items-center">
+                <h3 class="text-white">@Model.City</h3>
+                <h3 class="text-white">@Model.Date.ToString("d MMMM yyyy dddd", new
+                    System.Globalization.CultureInfo("tr-TR"))</h3>
             </div>
+        </div>
 
-
-            <!-- Kart İçeriği -->
-            <div class="card-body">
-                <div class="row g-4">
-                    <!-- Sıcaklık -->
-                    <div class="col-md-3">
-                        <div class="card p-3 rounded-3 shadow-sm">
-                            <h5 class="text-center text-primary">
-                                <i class="bi bi-thermometer-half" style="font-size: 2rem;"></i>
-                                <br>
-                                <strong>Sıcaklık</strong>
-                            </h5>
-                            <p class="text-center display-4" style="font-size: 2rem;">
-                                @(Math.Round(Model.Temperature)) °C
-                            </p>
-                        </div>
+        <div class="card-body">
+            <div class="row g-4">
+                <div class="col-sm-6 col-md-3">
+                    <div class="card p-3 rounded-3 shadow-sm">
+                        <h5 class="text-center text-primary">
+                            <i class="bi bi-thermometer-half"
+                                style="font-size: 2rem; color: @GetTemperatureIconColor(Model.Temperature);"></i>
+                            <br>
+                            <strong>Sıcaklık</strong>
+                        </h5>
+                        <p class="text-center display-4" style="font-size: 2rem;">
+                            @(Math.Round(Model.Temperature)) °C
+                        </p>
                     </div>
+                </div>
 
-                    <!-- Hava Durumu -->
-                    <div class="col-md-3">
-                        <div class="card p-3 rounded-3 shadow-sm">
-                            <h5 class="text-center text-secondary">
-                                <i class="bi bi-cloud-sun" style="font-size: 2rem;"></i>
-                                <br>
-                                <strong>Hava Durumu</strong>
-                            </h5>
-                            <p class="text-center lead" style="font-size: 1.5rem;">
-                                @Model.Description
-                            </p>
-                        </div>
+                <div class="col-sm-6 col-md-3">
+                    <div class="card p-3 rounded-3 shadow-sm">
+                        <h5 class="text-center text-secondary">
+                            <img src="@($" https://openweathermap.org/img/wn/{Model.Icon}.png")" alt="Hava Durumu"
+                                style="width: 50px; height: 50px;">
+                            <br>
+                            <strong>Hava Durumu</strong>
+                        </h5>
+                        <p class="text-center lead" style="font-size: 1.5rem;">
+                            @Model.Description
+                        </p>
                     </div>
+                </div>
 
-                    <!-- Nem -->
-                    <div class="col-md-3">
-                        <div class="card p-3 rounded-3 shadow-sm">
-                            <h5 class="text-center text-info">
-                                <i class="bi bi-moisture" style="font-size: 2rem;"></i>
-                                <br>
-                                <strong>Nem</strong>
-                            </h5>
-                            <p class="text-center lead" style="font-size: 1.5rem;">
-                                % @Model.Humidity
-                            </p>
-                        </div>
+                <div class="col-sm-6 col-md-3">
+                    <div class="card p-3 rounded-3 shadow-sm">
+                        <h5 class="text-center text-info">
+                            <i class="bi bi-moisture" style="font-size: 2rem;"></i>
+                            <br>
+                            <strong>Nem</strong>
+                        </h5>
+                        <p class="text-center lead" style="font-size: 1.5rem;">
+                            % @Model.Humidity
+                        </p>
                     </div>
+                </div>
 
-                    <!-- Rüzgar Hızı -->
-                    <div class="col-md-3">
-                        <div class="card p-3 rounded-3 shadow-sm">
-                            <h5 class="text-center text-warning">
-                                <i class="bi bi-wind" style="font-size: 2rem;"></i>
-                                <br>
-                                <strong>Rüzgar</strong>
-                            </h5>
-                            <p class="text-center lead" style="font-size: 1.5rem;">
-                                @Model.WindSpeed m/s
-                            </p>
-                        </div>
+                <div class="col-sm-6 col-md-3">
+                    <div class="card p-3 rounded-3 shadow-sm">
+                        <h5 class="text-center text-warning">
+                            <i class="bi bi-wind"
+                                style="font-size: 2rem; color: @GetWindIconColor(Model.WindSpeed);"></i>
+                            <br>
+                            <strong>Rüzgar</strong>
+                        </h5>
+                        <p class="text-center lead" style="font-size: 1.5rem;">
+                            @Model.WindSpeed m/s
+                        </p>
                     </div>
+                </div>
 
-                    <!-- Yağış -->
-                    <div class="col-md-3">
-                        <div class="card p-3 rounded-3 shadow-sm">
-                            <h5 class="text-center text-primary">
-                                <i class="bi bi-cloud-hail" style="font-size: 2rem;"></i>
-                                <br>
-                                <strong>Yağış</strong>
-                            </h5>
-                            <p class="text-center lead" style="font-size: 1.5rem;">
-                                @Model.Rain mm
-                            </p>
-                        </div>
+                <div class="col-sm-6 col-md-3">
+                    <div class="card p-3 rounded-3 shadow-sm">
+                        <h5 class="text-center text-primary">
+                            <i class="bi bi-cloud-hail" style="font-size: 2rem;"></i>
+                            <br>
+                            <strong>Yağış</strong>
+                        </h5>
+                        <p class="text-center lead" style="font-size: 1.5rem;">
+                            @Model.Rain mm
+                        </p>
                     </div>
+                </div>
 
-                    <!-- Gün Doğumu -->
-                    <div class="col-md-3">
-                        <div class="card p-3 rounded-3 shadow-sm">
-                            <h5 class="text-center text-success">
-                                <i class="bi bi-sunrise" style="font-size: 2rem;"></i>
-                                <br>
-                                <strong>Gün Doğumu</strong>
-                            </h5>
-                            <p class="text-center lead" style="font-size: 1.5rem;">
-                                @Model.SunRise.ToString("HH:mm dd-MM-yyyy")
-                            </p>
-                        </div>
+                <div class="col-sm-6 col-md-3">
+                    <div class="card p-3 rounded-3 shadow-sm">
+                        <h5 class="text-center text-success">
+                            <i class="bi bi-sunrise" style="font-size: 2rem;"></i>
+                            <br>
+                            <strong>Gün Doğumu</strong>
+                        </h5>
+                        <p class="text-center lead" style="font-size: 1.5rem;">
+                            @Model.SunRise.ToString("HH:mm dd-MM-yyyy")
+                        </p>
                     </div>
+                </div>
 
-                    <!-- Gün Batımı -->
-                    <div class="col-md-3">
-                        <div class="card p-3 rounded-3 shadow-sm">
-                            <h5 class="text-center text-danger">
-                                <i class="bi bi-sunset" style="font-size: 2rem;"></i>
-                                <br>
-                                <strong>Gün Batımı</strong>
-                            </h5>
-                            <p class="text-center lead" style="font-size: 1.5rem;">
-                                @Model.SunSet.ToString("HH:mm dd-MM-yyyy")
-                            </p>
-                        </div>
+                <div class="col-sm-6 col-md-3">
+                    <div class="card p-3 rounded-3 shadow-sm">
+                        <h5 class="text-center text-danger">
+                            <i class="bi bi-sunset" style="font-size: 2rem;"></i>
+                            <br>
+                            <strong>Gün Batımı</strong>
+                        </h5>
+                        <p class="text-center lead" style="font-size: 1.5rem;">
+                            @Model.SunSet.ToString("HH:mm dd-MM-yyyy")
+                        </p>
                     </div>
-
                 </div>
             </div>
         </div>
     </div>
-
-
 </div>
+
+    @functions {    
+
+        public string GetBackgroundColor(double temperature)
+        {
+            if (temperature > 30) return "#ff4c4c"; // Kırmızı (çok sıcak)
+            else if (temperature > 18) return "#ffcc00"; // Turuncu
+            else if (temperature > 5) return "#1e90ff"; // Mavi
+            return "#6a5acd"; // Mor
+        }
+
+        public string GetTemperatureIconColor(double temperature)
+        {
+            if (temperature > 30) return "red";
+            else if (temperature > 18) return "orange";
+            else if (temperature > 5) return "blue";
+            return "purple";
+        }
+
+        public string GetWindIconColor(double windSpeed)
+        {
+            if (windSpeed > 10) return "red"; // Hızlı rüzgar
+            return "gray"; // Düşük rüzgar
+        }
+    }

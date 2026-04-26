@@ -1,8 +1,35 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+ViewBag.Title = "Hoşgeldiniz";
 }
+<!DOCTYPE html>
+<html lang="tr">
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/home_styles.css" />
+</head>
+
+<body>
+    <div class="container">
+        <div class="logo">🌤️ Weathery</div>
+        <div class="tagline">Güncel hava durumu bilgilerini anında öğrenin!</div>
+
+        <div class="weather-preview">
+            <a href="/WeatherInfo/Index" class="weather-card">
+                <div class="weather-icon">☀️</div>
+                <div class="city">Anlık Hava Durumunu</div>
+                <div class="temp">Şimdi Kontrol Et!</div>
+            </a>
+            <a href="/Forecast/Index" class="weather-card">
+                <div class="weather-icon">⛅</div>
+                <div class="city">5 Günlük Tahminlere Göz At!</div>
+            </a>
+        </div>
+    </div>
+    <footer>&copy; 2024 - Weathery</footer>
+</body>
+
+</html>

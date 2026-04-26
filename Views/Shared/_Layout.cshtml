@@ -4,16 +4,17 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Weathery</title>
+    <title>@ViewData["Title"] Weathery</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/Weathery.styles.css" asp-append-version="true" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
-
 </head>
 
 <body>
     <header>
+        @if (!(ViewContext.RouteData.Values["controller"].ToString() == "Home" 
+    && ViewContext.RouteData.Values["action"].ToString() == "Index")){
         <nav class="navbar navbar-expand-sm border-bottom box-shadow mb-3" style="background: linear-gradient(135deg, #4e73df, #1cc88a); ">
             <div class="container-fluid">
                 <a class="navbar-brand text-white" href="/" style="font-weight: bold;">
@@ -34,7 +35,10 @@
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav ms-auto">
                         <li class="nav-item">
-                            <a class="nav-link text-white" aria-current="page" href="@Url.Action("Index", "WeatherInfo")">Anasayfa</a>
+                            <a class="nav-link text-white" aria-current="page" href="@Url.Action("Index", "Home")">Anasayfa</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" aria-current="page" href="@Url.Action("Index", "WeatherInfo")">Anlık Hava Durumu</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link text-white" href="@Url.Action("Index", "Forecast")">5 Günlük Tahmin</a>
@@ -43,6 +47,7 @@
                 </div>
             </div>
         </nav>
+    }
     </header>
     <div class="container">
         <main role="main" class="pb-3">
