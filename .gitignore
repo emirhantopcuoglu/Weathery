@@ -1,5 +1,8 @@
 appsettings.json
 
+# Claude Code yerel ayarları
+.claude/
+
 # Tüm wwwroot klasörünü hariç tut
 wwwroot/
 
