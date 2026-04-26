@@ -48,7 +48,32 @@
         localStorage.setItem(STORAGE_KEYS.recents, JSON.stringify(list.slice(0, MAX_RECENTS)));
     }
 
-    function initRecents() {
+    function escapeHtml(str) {
+        return String(str).replace(/[&<>"']/g, c => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+        }[c]));
+    }
+
+    async function fetchSuggestions(query) {
+        const url = `https://geocoding-api.open-meteo.com/v1/search` +
+                    `?name=${encodeURIComponent(query)}&count=6&language=tr&format=json`;
+        try {
+            const res = await fetch(url);
+            if (!res.ok) return [];
+            const data = await res.json();
+            return data.results || [];
+        } catch { return []; }
+    }
+
+    function debounce(fn, ms) {
+        let t;
+        return (...args) => {
+            clearTimeout(t);
+            t = setTimeout(() => fn(...args), ms);
+        };
+    }
+
+    function initSearch() {
         const form = document.querySelector('.search-form');
         if (!form) return;
 
@@ -61,28 +86,94 @@
 
         if (!input || !list) return;
 
-        function renderRecents() {
-            const recents = getRecents();
+        let activeIndex = -1;
+        let currentItems = [];
+
+        function renderItems(items, mode) {
             list.innerHTML = '';
-            if (recents.length === 0) {
-                list.classList.remove('is-open');
+            currentItems = items;
+            activeIndex = -1;
+
+            if (items.length === 0) {
+                if (mode === 'remote') {
+                    list.innerHTML = '<div class="suggestion-empty">Sonuç bulunamadı</div>';
+                    list.classList.add('is-open');
+                } else {
+                    list.classList.remove('is-open');
+                }
                 return;
             }
-            recents.forEach(city => {
+
+            items.forEach((item, i) => {
                 const li = document.createElement('li');
-                li.innerHTML = `<i class="bi bi-clock-history"></i><span>${city}</span>`;
+                li.dataset.index = i;
+                const icon = mode === 'recent' ? 'bi-clock-history' : 'bi-geo-alt';
+                const meta = item.meta ? `<span class="suggestion-meta">${escapeHtml(item.meta)}</span>` : '';
+                li.innerHTML = `<i class="bi ${icon}"></i><span class="suggestion-name">${escapeHtml(item.label)}</span>${meta}`;
                 li.addEventListener('mousedown', e => {
                     e.preventDefault();
-                    input.value = city;
+                    input.value = item.value;
                     form.submit();
                 });
+                li.addEventListener('mouseenter', () => setActive(i));
                 list.appendChild(li);
             });
             list.classList.add('is-open');
         }
 
-        input.addEventListener('focus', renderRecents);
+        function setActive(i) {
+            activeIndex = i;
+            list.querySelectorAll('li').forEach((el, idx) => {
+                el.classList.toggle('is-active', idx === i);
+            });
+        }
+
+        function showRecents() {
+            const items = getRecents().map(city => ({ label: city, value: city, meta: '' }));
+            renderItems(items, 'recent');
+        }
+
+        const search = debounce(async query => {
+            if (input.value.trim() !== query) return;
+            const results = await fetchSuggestions(query);
+            if (input.value.trim() !== query) return;
+            const items = results.map(r => ({
+                label: r.name,
+                value: r.name,
+                meta: [r.admin1, r.country].filter(Boolean).join(', ')
+            }));
+            renderItems(items, 'remote');
+        }, 220);
+
+        input.addEventListener('focus', () => {
+            const q = input.value.trim();
+            if (q.length >= 2) search(q); else showRecents();
+        });
+
+        input.addEventListener('input', () => {
+            const q = input.value.trim();
+            if (q.length >= 2) search(q); else showRecents();
+        });
+
         input.addEventListener('blur', () => setTimeout(() => list.classList.remove('is-open'), 150));
+
+        input.addEventListener('keydown', e => {
+            if (!list.classList.contains('is-open') || currentItems.length === 0) return;
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                setActive((activeIndex + 1) % currentItems.length);
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                setActive(activeIndex <= 0 ? currentItems.length - 1 : activeIndex - 1);
+            } else if (e.key === 'Enter' && activeIndex >= 0) {
+                e.preventDefault();
+                input.value = currentItems[activeIndex].value;
+                form.submit();
+            } else if (e.key === 'Escape') {
+                list.classList.remove('is-open');
+            }
+        });
+
         form.addEventListener('submit', () => pushRecent(input.value));
     }
 
@@ -199,7 +290,7 @@
     // ---------- Init ----------
     document.addEventListener('DOMContentLoaded', () => {
         initTheme();
-        initRecents();
+        initSearch();
         initCountUp();
         initDailySelector();
         spawnEffect();

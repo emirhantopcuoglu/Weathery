@@ -79,6 +79,8 @@ body[data-theme="dark"].weather-clear-night { --bg-grad-start: #050a18; --bg-gra
     padding: 0.75rem 1.25rem;
     margin-bottom: 1.5rem;
     border-radius: 0 0 var(--radius-md) var(--radius-md);
+    position: relative;
+    z-index: 100;
 }
 
 .weathery-navbar .navbar-brand {
@@ -113,6 +115,7 @@ body[data-theme="dark"].weather-clear-night { --bg-grad-start: #050a18; --bg-gra
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    z-index: 110;
 }
 
 .search-input {
@@ -172,17 +175,32 @@ body[data-theme="dark"].weather-clear-night { --bg-grad-start: #050a18; --bg-gra
 .recent-suggestions.is-open { display: block; }
 
 .recent-suggestions li {
-    padding: 0.5rem 0.8rem;
+    padding: 0.55rem 0.8rem;
     border-radius: 8px;
     cursor: pointer;
     color: var(--text-primary);
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    transition: background 0.2s;
+    gap: 0.6rem;
+    transition: background 0.15s;
 }
 
+.recent-suggestions li.is-active,
 .recent-suggestions li:hover { background: var(--accent-soft); }
+
+.recent-suggestions .suggestion-name { font-weight: 500; }
+.recent-suggestions .suggestion-meta {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-left: auto;
+}
+
+.recent-suggestions .suggestion-empty {
+    padding: 0.6rem 0.8rem;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    text-align: center;
+}
 
 .theme-toggle {
     background: var(--surface-strong);
@@ -620,7 +638,7 @@ body.weather-mist .weather-icon-big { color: #cbd5e1; }
 }
 
 /* İçerik fx üstünde */
-main, .weathery-navbar, .home-hero { position: relative; z-index: 1; }
+main, .home-hero { position: relative; z-index: 1; }
 
 /* ==========================================================================
    Skeleton
