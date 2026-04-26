@@ -1,5 +1,6 @@
 using System.Net;
 using System.Text.Json;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using Weathery.Helpers;
 using Weathery.Models;
@@ -9,6 +10,9 @@ namespace Weathery.Services;
 
 public sealed class OpenWeatherService : IWeatherService, IForecastService
 {
+    private static readonly TimeSpan CurrentWeatherTtl = TimeSpan.FromMinutes(10);
+    private static readonly TimeSpan ForecastTtl = TimeSpan.FromMinutes(30);
+
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         PropertyNameCaseInsensitive = true
@@ -16,64 +20,124 @@ public sealed class OpenWeatherService : IWeatherService, IForecastService
 
     private readonly HttpClient _httpClient;
     private readonly WeatherApiOptions _options;
+    private readonly IMemoryCache _cache;
     private readonly ILogger<OpenWeatherService> _logger;
 
     public OpenWeatherService(
         HttpClient httpClient,
         IOptions<WeatherApiOptions> options,
+        IMemoryCache cache,
         ILogger<OpenWeatherService> logger)
     {
         _httpClient = httpClient;
         _options = options.Value;
+        _cache = cache;
         _logger = logger;
     }
 
-    public async Task<WeatherInfo?> GetCurrentAsync(string city, CancellationToken cancellationToken = default)
+    public Task<WeatherInfo?> GetCurrentAsync(string city, CancellationToken cancellationToken = default)
     {
-        var url = BuildUrl("weather", city);
-        var response = await SendAsync<CurrentWeatherResponse>(url, cancellationToken);
-        if (response is null)
+        var cacheKey = $"weather:current:{city.ToLowerInvariant()}";
+        return _cache.GetOrCreateAsync(cacheKey, async entry =>
         {
-            return null;
-        }
+            entry.AbsoluteExpirationRelativeToNow = CurrentWeatherTtl;
+            var url = BuildUrl("weather", city);
+            var response = await SendAsync<CurrentWeatherResponse>(url, cancellationToken);
+            if (response is null)
+            {
+                entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(30);
+                return null;
+            }
+            return MapCurrent(response);
+        });
+    }
 
+    public Task<ForecastData?> Get5DayAsync(string city, CancellationToken cancellationToken = default)
+    {
+        var cacheKey = $"weather:forecast:{city.ToLowerInvariant()}";
+        return _cache.GetOrCreateAsync(cacheKey, async entry =>
+        {
+            entry.AbsoluteExpirationRelativeToNow = ForecastTtl;
+            var url = BuildUrl("forecast", city);
+            var response = await SendAsync<ForecastResponse>(url, cancellationToken);
+            if (response?.List is null || response.City is null)
+            {
+                entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(30);
+                return null;
+            }
+            return MapForecast(response, city);
+        });
+    }
+
+    private static WeatherInfo MapCurrent(CurrentWeatherResponse response)
+    {
         var weather = response.Weather?.FirstOrDefault();
         return new WeatherInfo
         {
             City = response.Name,
+            Country = response.Sys?.Country,
             Latitude = response.Coord?.Lat ?? 0,
             Longitude = response.Coord?.Lon ?? 0,
             Icon = weather?.Icon,
+            Condition = weather?.Main,
             Description = weather?.Description,
             Temperature = response.Main?.Temp ?? 0,
+            FeelsLike = response.Main?.FeelsLike ?? 0,
+            TempMin = response.Main?.TempMin ?? 0,
+            TempMax = response.Main?.TempMax ?? 0,
             Humidity = response.Main?.Humidity ?? 0,
             WindSpeed = response.Wind?.Speed ?? 0,
-            Rain = response.Rain?.OneHour ?? 0,
+            WindDeg = response.Wind?.Deg ?? 0,
+            Pressure = response.Main?.Pressure ?? 0,
+            VisibilityKm = Math.Round(response.Visibility / 1000.0, 1),
+            Rain = response.Rain?.OneHour ?? response.Rain?.ThreeHour ?? 0,
             SunRise = UnixTime.ToLocalDateTime(response.Sys?.Sunrise ?? 0),
             SunSet = UnixTime.ToLocalDateTime(response.Sys?.Sunset ?? 0),
             Date = DateTime.Now
         };
     }
 
-    public async Task<ForecastData?> Get5DayAsync(string city, CancellationToken cancellationToken = default)
+    private static ForecastData MapForecast(ForecastResponse response, string fallbackCity)
     {
-        var url = BuildUrl("forecast", city);
-        var response = await SendAsync<ForecastResponse>(url, cancellationToken);
-        if (response?.List is null || response.City is null)
+        var forecasts = response.List!.Select(item =>
         {
-            return null;
-        }
-
-        return new ForecastData
-        {
-            City = response.City.Name ?? city,
-            Country = response.City.Country ?? string.Empty,
-            Forecasts = response.List.Select(item => new HourlyForecast
+            var w = item.Weather?.FirstOrDefault();
+            return new HourlyForecast
             {
                 DateTime = UnixTime.ToLocalDateTime(item.Dt),
                 Temperature = item.Main?.Temp ?? 0,
-                Description = item.Weather?.FirstOrDefault()?.Description ?? string.Empty
-            }).ToList()
+                FeelsLike = item.Main?.FeelsLike ?? 0,
+                Description = w?.Description ?? string.Empty,
+                Icon = w?.Icon ?? string.Empty,
+                Condition = w?.Main ?? string.Empty
+            };
+        }).ToList();
+
+        var daily = forecasts
+            .GroupBy(f => f.DateTime.Date)
+            .Select(g =>
+            {
+                var midday = g.OrderBy(s => Math.Abs((s.DateTime.Hour - 12))).First();
+                return new DailySummary
+                {
+                    Date = g.Key,
+                    TempMin = g.Min(s => s.Temperature),
+                    TempMax = g.Max(s => s.Temperature),
+                    Icon = midday.Icon,
+                    Description = midday.Description,
+                    Condition = midday.Condition,
+                    Slots = g.OrderBy(s => s.DateTime).ToList()
+                };
+            })
+            .OrderBy(d => d.Date)
+            .ToList();
+
+        return new ForecastData
+        {
+            City = response.City!.Name ?? fallbackCity,
+            Country = response.City.Country ?? string.Empty,
+            Forecasts = forecasts,
+            Daily = daily
         };
     }
 

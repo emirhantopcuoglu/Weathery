@@ -2,30 +2,34 @@ namespace Weathery.Helpers;
 
 public static class WeatherDisplay
 {
-    private const double HotTemperatureThreshold = 30;
-    private const double WarmTemperatureThreshold = 18;
-    private const double CoolTemperatureThreshold = 5;
-    private const double HighWindThreshold = 10;
-
-    public static string BackgroundColor(double temperature) => temperature switch
-    {
-        > HotTemperatureThreshold => "#ff4c4c",
-        > WarmTemperatureThreshold => "#ffcc00",
-        > CoolTemperatureThreshold => "#1e90ff",
-        _ => "#6a5acd"
-    };
-
-    public static string TemperatureIconColor(double temperature) => temperature switch
-    {
-        > HotTemperatureThreshold => "red",
-        > WarmTemperatureThreshold => "orange",
-        > CoolTemperatureThreshold => "blue",
-        _ => "purple"
-    };
-
-    public static string WindIconColor(double windSpeed)
-        => windSpeed > HighWindThreshold ? "red" : "gray";
-
     public static string IconUrl(string? icon)
-        => string.IsNullOrEmpty(icon) ? string.Empty : $"https://openweathermap.org/img/wn/{icon}.png";
+        => string.IsNullOrEmpty(icon) ? string.Empty : $"https://openweathermap.org/img/wn/{icon}@2x.png";
+
+    public static string ConditionClass(string? condition, string? icon = null)
+    {
+        var isNight = !string.IsNullOrEmpty(icon) && icon.EndsWith("n", StringComparison.OrdinalIgnoreCase);
+        var key = (condition ?? string.Empty).ToLowerInvariant() switch
+        {
+            "clear" => isNight ? "clear-night" : "clear-day",
+            "clouds" => "clouds",
+            "rain" or "drizzle" => "rain",
+            "thunderstorm" => "thunder",
+            "snow" => "snow",
+            "mist" or "fog" or "haze" or "smoke" or "dust" or "sand" or "ash" or "squall" or "tornado" => "mist",
+            _ => "default"
+        };
+        return $"weather-{key}";
+    }
+
+    public static string WindDirection(int deg) => deg switch
+    {
+        >= 337 or < 23 => "K",
+        < 68 => "KD",
+        < 113 => "D",
+        < 158 => "GD",
+        < 203 => "G",
+        < 248 => "GB",
+        < 293 => "B",
+        _ => "KB"
+    };
 }
