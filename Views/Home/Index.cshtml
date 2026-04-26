@@ -1,35 +1,33 @@
-﻿@{
-ViewBag.Title = "Hoşgeldiniz";
+@{
+    ViewData["Title"] = "Hoşgeldiniz";
+    Layout = null;
 }
 <!DOCTYPE html>
 <html lang="tr">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@ViewBag.Title</title>
+    <title>@ViewData["Title"]</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="~/css/home_styles.css" />
 </head>
-
 <body>
     <div class="container">
         <div class="logo">🌤️ Weathery</div>
         <div class="tagline">Güncel hava durumu bilgilerini anında öğrenin!</div>
 
         <div class="weather-preview">
-            <a href="/WeatherInfo/Index" class="weather-card">
+            <a href="@Url.Action("Index", "WeatherInfo")" class="weather-card">
                 <div class="weather-icon">☀️</div>
                 <div class="city">Anlık Hava Durumunu</div>
                 <div class="temp">Şimdi Kontrol Et!</div>
             </a>
-            <a href="/Forecast/Index" class="weather-card">
+            <a href="@Url.Action("Index", "Forecast")" class="weather-card">
                 <div class="weather-icon">⛅</div>
                 <div class="city">5 Günlük Tahminlere Göz At!</div>
             </a>
         </div>
     </div>
-    <footer>&copy; 2024 - Weathery</footer>
+    <footer>&copy; @DateTime.Now.Year - Weathery</footer>
 </body>
-
 </html>

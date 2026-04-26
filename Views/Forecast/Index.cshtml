@@ -1,70 +1,70 @@
 @model ForecastData
+@{
+    ViewData["Title"] = "5 Günlük Tahmin";
+    const int slotCount = 8;
+    const int hoursPerSlot = 3;
+}
 <link rel="stylesheet" href="~/css/forecast_styles.css" />
 <div class="container mt-5">
-    <h1 class="text-center text-primary mb-4">@Model.City, @Model.Country</h1>
-
     @if (TempData["Error"] != null)
     {
-    <div class="alert alert-danger text-center" role="alert">
-        @TempData["Error"]
-    </div>
+        <div class="alert alert-danger text-center" role="alert">
+            @TempData["Error"]
+        </div>
     }
 
-    <div class="card shadow-lg border-0 rounded-3" style="background: #f8f9fa;">
-        <div class="card-header"
-            style="background: linear-gradient(135deg, #56ccf2, #2f80ed); border-radius: 15px 15px 0 0;">
-            <strong class="text-white">5 Günlük / 3 Saatlik Hava Tahminleri</strong>
-        </div>
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-bordered table-hover" style="border-color: #e1e5eb;">
-                    <thead>
-                        <tr>
-                            <th class="text-center"
-                                style="background-color: #f0f4f8; color: #5d6e7e; font-weight: normal;">Tarih / Saat
-                            </th>
-                            @foreach (var hour in Enumerable.Range(0, 8))
-                            {
-                            <th class="text-center"
-                                style="background-color: #f0f4f8; color: #5d6e7e; font-weight: normal;">@((hour *
-                                3).ToString("00")):00</th>
-                            }
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var dayGroup in Model.Forecasts.GroupBy(f => f.DateTime.Date))
-                        {
-                        <tr>
-                            <td class="align-middle text-center text-dark"
-                                style="font-weight: bold; background-color: #f8f9fa;">
-                                @dayGroup.Key.ToString("dd MMM yyyy")
-                            </td>
+    @if (Model != null)
+    {
+        <h1 class="text-center text-primary mb-4">@Model.City, @Model.Country</h1>
 
-                            @foreach (var hour in Enumerable.Range(0, 8))
+        <div class="card shadow-lg border-0 rounded-3 forecast-card">
+            <div class="card-header forecast-header">
+                <strong class="text-white">5 Günlük / 3 Saatlik Hava Tahminleri</strong>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover forecast-table">
+                        <thead>
+                            <tr>
+                                <th class="text-center forecast-th">Tarih / Saat</th>
+                                @foreach (var hour in Enumerable.Range(0, slotCount))
+                                {
+                                    <th class="text-center forecast-th">@((hour * hoursPerSlot).ToString("00")):00</th>
+                                }
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var dayGroup in Model.Forecasts.GroupBy(f => f.DateTime.Date))
                             {
-                            var forecast = dayGroup.FirstOrDefault(f => f.DateTime.Hour == hour * 3);
-                            if (forecast != null)
-                            {
-                            <td class="text-center"
-                                style="background-color: #ffffff; padding: 12px 15px; border-radius: 10px; min-width: 140px; max-width: 140px;">
-                                <div style="display: flex; flex-direction: column; align-items: center;">
-                                    <i class="bi bi-thermometer-half text-warning" style="font-size: 1.5rem;"></i>
-                                    <span class="d-block fs-5"
-                                        style="font-weight: bold;">@(Math.Round(forecast.Temperature)) °C</span>
-                                    <div class="text-muted fs-6">@forecast.Description</div>
-                                </div>
-                            </td>
+                                <tr>
+                                    <td class="align-middle text-center text-dark forecast-day">
+                                        @dayGroup.Key.ToString("dd MMM yyyy")
+                                    </td>
+
+                                    @foreach (var hour in Enumerable.Range(0, slotCount))
+                                    {
+                                        var forecast = dayGroup.FirstOrDefault(f => f.DateTime.Hour == hour * hoursPerSlot);
+                                        if (forecast != null)
+                                        {
+                                            <td class="text-center forecast-cell">
+                                                <div class="forecast-cell-content">
+                                                    <i class="bi bi-thermometer-half text-warning forecast-icon"></i>
+                                                    <span class="d-block fs-5 forecast-temp">@(Math.Round(forecast.Temperature)) °C</span>
+                                                    <div class="text-muted fs-6">@forecast.Description</div>
+                                                </div>
+                                            </td>
+                                        }
+                                        else
+                                        {
+                                            <td class="text-center text-muted forecast-empty">-</td>
+                                        }
+                                    }
+                                </tr>
                             }
-                            else
-                            {
-                            <td class="text-center text-muted" style="background-color: #f8f9fa;">-</td>
-                            }
-                            }
-                        </tr>
-                        }
-                    </tbody>
-                </table>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
-    </div>
+    }
 </div>

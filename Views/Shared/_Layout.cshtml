@@ -1,53 +1,58 @@
-﻿<!DOCTYPE html>
-<html lang="en">
-
+@{
+    var controller = ViewContext.RouteData.Values["controller"]?.ToString();
+    var action = ViewContext.RouteData.Values["action"]?.ToString();
+    var hideNav = string.Equals(controller, "Home", StringComparison.OrdinalIgnoreCase)
+                  && string.Equals(action, "Index", StringComparison.OrdinalIgnoreCase);
+}
+<!DOCTYPE html>
+<html lang="tr">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] Weathery</title>
+    <title>@ViewData["Title"] - Weathery</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/Weathery.styles.css" asp-append-version="true" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
 </head>
-
 <body>
     <header>
-        @if (!(ViewContext.RouteData.Values["controller"].ToString() == "Home" 
-    && ViewContext.RouteData.Values["action"].ToString() == "Index")){
-        <nav class="navbar navbar-expand-sm border-bottom box-shadow mb-3" style="background: linear-gradient(135deg, #4e73df, #1cc88a); ">
-            <div class="container-fluid">
-                <a class="navbar-brand text-white" href="/" style="font-weight: bold;">
-                    Weathery <i class="bi bi-cloud-sun-fill"></i></a>
+        @if (!hideNav)
+        {
+            <nav class="navbar navbar-expand-sm border-bottom box-shadow mb-3 weathery-navbar">
+                <div class="container-fluid">
+                    <a class="navbar-brand text-white fw-bold" href="@Url.Action("Index", "Home")">
+                        Weathery <i class="bi bi-cloud-sun-fill"></i>
+                    </a>
 
                     <form class="d-flex ms-auto" method="get" action="@Context.Request.Path">
-                        <input class="form-control me-2" type="text" name="city" placeholder="Şehir ismi giriniz" aria-label="Search" required>
+                        <input class="form-control me-2" type="text" name="city"
+                               placeholder="Şehir ismi giriniz" aria-label="Şehir ara" required>
                         <button class="btn btn-light" type="submit">Ara</button>
                     </form>
-                    
-                    
-                
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse"
-                    aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
 
-                <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav ms-auto">
-                        <li class="nav-item">
-                            <a class="nav-link text-white" aria-current="page" href="@Url.Action("Index", "Home")">Anasayfa</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-white" aria-current="page" href="@Url.Action("Index", "WeatherInfo")">Anlık Hava Durumu</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-white" href="@Url.Action("Index", "Forecast")">5 Günlük Tahmin</a>
-                        </li>
-                    </ul>
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#navbarNav" aria-controls="navbarNav"
+                            aria-expanded="false" aria-label="Menüyü aç/kapat">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+
+                    <div class="collapse navbar-collapse" id="navbarNav">
+                        <ul class="navbar-nav ms-auto">
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="@Url.Action("Index", "Home")">Anasayfa</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="@Url.Action("Index", "WeatherInfo")">Anlık Hava Durumu</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="@Url.Action("Index", "Forecast")">5 Günlük Tahmin</a>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
-            </div>
-        </nav>
-    }
+            </nav>
+        }
     </header>
     <div class="container">
         <main role="main" class="pb-3">
@@ -55,15 +60,10 @@
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
-        <!-- <div class="container">
-            &copy; 2024 - Weathery - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-        </div> -->
-    </footer>
+    <footer class="border-top footer text-muted"></footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
-
 </html>
