@@ -202,6 +202,49 @@ body[data-theme="dark"].weather-clear-night { --bg-grad-start: #050a18; --bg-gra
     text-align: center;
 }
 
+.suggestion-remove {
+    margin-left: auto;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.15s, background 0.15s, color 0.15s;
+    font-size: 0.8rem;
+}
+
+.recent-suggestions li:hover .suggestion-remove,
+.recent-suggestions li.is-active .suggestion-remove { opacity: 1; }
+
+.suggestion-remove:hover {
+    background: rgba(225, 29, 72, 0.15);
+    color: var(--danger);
+}
+
+.suggestion-clear {
+    padding: 0.55rem 0.8rem;
+    margin-top: 0.3rem;
+    border-top: 1px solid var(--surface-border);
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    text-align: center;
+    cursor: pointer;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    transition: background 0.15s, color 0.15s;
+}
+
+.suggestion-clear:hover { background: rgba(225, 29, 72, 0.1); color: var(--danger); }
+
 .theme-toggle {
     background: var(--surface-strong);
     border: 1px solid var(--surface-border);

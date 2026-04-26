@@ -48,6 +48,15 @@
         localStorage.setItem(STORAGE_KEYS.recents, JSON.stringify(list.slice(0, MAX_RECENTS)));
     }
 
+    function removeRecent(city) {
+        const list = getRecents().filter(c => c.toLowerCase() !== city.toLowerCase());
+        localStorage.setItem(STORAGE_KEYS.recents, JSON.stringify(list));
+    }
+
+    function clearRecents() {
+        localStorage.removeItem(STORAGE_KEYS.recents);
+    }
+
     function escapeHtml(str) {
         return String(str).replace(/[&<>"']/g, c => ({
             '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
@@ -109,8 +118,21 @@
                 li.dataset.index = i;
                 const icon = mode === 'recent' ? 'bi-clock-history' : 'bi-geo-alt';
                 const meta = item.meta ? `<span class="suggestion-meta">${escapeHtml(item.meta)}</span>` : '';
-                li.innerHTML = `<i class="bi ${icon}"></i><span class="suggestion-name">${escapeHtml(item.label)}</span>${meta}`;
+                const removeBtn = mode === 'recent'
+                    ? `<button class="suggestion-remove" type="button" aria-label="Geçmişten kaldır" title="Kaldır"><i class="bi bi-x-lg"></i></button>`
+                    : '';
+                li.innerHTML =
+                    `<i class="bi ${icon}"></i>` +
+                    `<span class="suggestion-name">${escapeHtml(item.label)}</span>` +
+                    meta + removeBtn;
+
                 li.addEventListener('mousedown', e => {
+                    if (e.target.closest('.suggestion-remove')) {
+                        e.preventDefault();
+                        removeRecent(item.value);
+                        showRecents();
+                        return;
+                    }
                     e.preventDefault();
                     input.value = item.value;
                     form.submit();
@@ -118,6 +140,19 @@
                 li.addEventListener('mouseenter', () => setActive(i));
                 list.appendChild(li);
             });
+
+            if (mode === 'recent' && items.length > 0) {
+                const clearAll = document.createElement('div');
+                clearAll.className = 'suggestion-clear';
+                clearAll.innerHTML = `<i class="bi bi-trash"></i> Tüm geçmişi temizle`;
+                clearAll.addEventListener('mousedown', e => {
+                    e.preventDefault();
+                    clearRecents();
+                    list.classList.remove('is-open');
+                });
+                list.appendChild(clearAll);
+            }
+
             list.classList.add('is-open');
         }
 
