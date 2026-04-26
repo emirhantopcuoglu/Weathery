@@ -4,7 +4,7 @@
     var trCulture = new System.Globalization.CultureInfo("tr-TR");
     if (Model?.Daily.FirstOrDefault() is { } first)
     {
-        ViewData["WeatherCondition"] = WeatherDisplay.ConditionClass(first.Condition, first.Icon).Replace("weather-", "");
+        ViewData["WeatherCondition"] = first.Condition;
     }
 }
 
@@ -37,7 +37,7 @@
             <div class="glass day-card" data-date="@dateKey" style="animation-delay: @(dayIndex * 60)ms">
                 <div class="day-name">@day.Date.ToString("dddd", trCulture)</div>
                 <div class="day-date">@day.Date.ToString("d MMM", trCulture)</div>
-                <img src="@WeatherDisplay.IconUrl(day.Icon)" alt="@day.Description">
+                <i class="bi @day.Icon day-icon" aria-hidden="true"></i>
                 <div class="day-temps">
                     <span class="day-max">@Math.Round(day.TempMax)°</span>
                     <span class="day-min">@Math.Round(day.TempMin)°</span>
@@ -62,7 +62,7 @@
                 {
                     <div class="glass hour-card" style="animation-delay: @(slotIndex * 40)ms">
                         <div class="hour-time">@slot.DateTime.ToString("HH:mm")</div>
-                        <img src="@WeatherDisplay.IconUrl(slot.Icon)" alt="@slot.Description">
+                        <i class="bi @slot.Icon hour-icon" aria-hidden="true"></i>
                         <div class="hour-temp">@Math.Round(slot.Temperature)°</div>
                         <div class="day-desc">@slot.Description</div>
                     </div>

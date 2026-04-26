@@ -4,13 +4,12 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddOptions<WeatherApiOptions>()
     .Bind(builder.Configuration.GetSection(WeatherApiOptions.SectionName))
-    .Configure(opts => opts.ApiKey = builder.Configuration["WeatherApiKey"] ?? opts.ApiKey)
     .ValidateOnStart();
 
 builder.Services.AddMemoryCache();
-builder.Services.AddHttpClient<OpenWeatherService>();
-builder.Services.AddScoped<IWeatherService>(sp => sp.GetRequiredService<OpenWeatherService>());
-builder.Services.AddScoped<IForecastService>(sp => sp.GetRequiredService<OpenWeatherService>());
+builder.Services.AddHttpClient<OpenMeteoService>();
+builder.Services.AddScoped<IWeatherService>(sp => sp.GetRequiredService<OpenMeteoService>());
+builder.Services.AddScoped<IForecastService>(sp => sp.GetRequiredService<OpenMeteoService>());
 
 builder.Services.AddControllersWithViews();
 

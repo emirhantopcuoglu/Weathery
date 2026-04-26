@@ -17,7 +17,6 @@ public class WeatherInfo
     public double WindSpeed { get; set; }
     public int WindDeg { get; set; }
     public double Pressure { get; set; }
-    public double VisibilityKm { get; set; }
     public double Rain { get; set; }
     public DateTime SunRise { get; set; }
     public DateTime SunSet { get; set; }
