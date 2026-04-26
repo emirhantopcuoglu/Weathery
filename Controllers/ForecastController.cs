@@ -1,82 +1,36 @@
-using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
-using Weathery.Models;
+using Microsoft.Extensions.Options;
+using Weathery.Services;
 
-namespace Weathery.Controllers
+namespace Weathery.Controllers;
+
+public class ForecastController : Controller
 {
-    public class ForecastController : Controller
+    private readonly IForecastService _forecastService;
+    private readonly WeatherApiOptions _options;
+
+    public ForecastController(IForecastService forecastService, IOptions<WeatherApiOptions> options)
     {
-        private readonly IConfiguration _configuration;
-        public ForecastController(IConfiguration configuration)
-        {
-            _configuration = configuration;
-        }
+        _forecastService = forecastService;
+        _options = options.Value;
+    }
 
-        public async Task<IActionResult> Index(string city = "Istanbul")
+    public async Task<IActionResult> Index(string? city, CancellationToken cancellationToken)
+    {
+        var query = string.IsNullOrWhiteSpace(city) ? _options.DefaultCity : city.Trim();
+
+        var forecastData = await _forecastService.Get5DayAsync(query, cancellationToken);
+
+        if (forecastData is null)
         {
-            if (string.IsNullOrWhiteSpace(city))
+            TempData["Error"] = "Şehir bulunamadı veya tahmin verisi alınamadı. Lütfen tekrar deneyiniz.";
+            if (!string.Equals(query, _options.DefaultCity, StringComparison.OrdinalIgnoreCase))
             {
-                city = "Istanbul"; // Varsayılan şehir
+                return RedirectToAction(nameof(Index), new { city = _options.DefaultCity });
             }
-
-            var forecastData = await GetForecastDataAsync(city);
-
-            if (forecastData == null)
-            {
-                TempData["Error"] = "Veri alınamadı. Lütfen tekrar deneyiniz.";
-                return RedirectToAction("Index");
-            }
-
-            return View(forecastData);
+            return View();
         }
 
-        private async Task<ForecastData> GetForecastDataAsync(string city)
-        {
-            var apiKey = _configuration["WeatherApiKey"];
-
-            using (var client = new HttpClient())
-            {
-                string url = $"http://api.openweathermap.org/data/2.5/forecast?q={city}&appid={apiKey}&units=metric&lang=tr";
-
-                var response = await client.GetStringAsync(url);
-                var data = JsonSerializer.Deserialize<JsonElement>(response);
-
-                if (!response.Contains("list"))
-                {
-                    return null; // Veri bulunamazsa null döndür
-                }
-
-                return ParseForecastData(data);
-            }
-        }
-
-        private ForecastData ParseForecastData(JsonElement data)
-        {
-            var forecastData = new ForecastData
-            {
-                City = data.GetProperty("city").GetProperty("name").GetString(),
-                Country = data.GetProperty("city").GetProperty("country").GetString(),
-                Forecasts = new List<HourlyForecast>()
-            };
-
-            foreach (var item in data.GetProperty("list").EnumerateArray())
-            {
-                var forecast = new HourlyForecast
-                {
-                    DateTime = UnixTimeToDateTime(item.GetProperty("dt").GetDouble()),
-                    Temperature = item.GetProperty("main").GetProperty("temp").GetDouble(),
-                    Description = item.GetProperty("weather")[0].GetProperty("description").GetString()
-                };
-                forecastData.Forecasts.Add(forecast);
-            }
-
-            return forecastData;
-        }
-
-        public static DateTime UnixTimeToDateTime(double unixTime)
-        {
-            DateTimeOffset dateTimeOffset = DateTimeOffset.FromUnixTimeSeconds((long)unixTime);
-            return dateTimeOffset.DateTime.ToLocalTime(); // Yerel saat dilimine göre dönüştürme
-        }
+        return View(forecastData);
     }
 }

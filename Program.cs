@@ -1,18 +1,23 @@
+using Weathery.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Configuration.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
-builder.Services.AddHttpClient();
+builder.Services.AddOptions<WeatherApiOptions>()
+    .Bind(builder.Configuration.GetSection(WeatherApiOptions.SectionName))
+    .Configure(opts => opts.ApiKey = builder.Configuration["WeatherApiKey"] ?? opts.ApiKey)
+    .ValidateOnStart();
 
-// Add services to the container.
+builder.Services.AddHttpClient<OpenWeatherService>();
+builder.Services.AddScoped<IWeatherService>(sp => sp.GetRequiredService<OpenWeatherService>());
+builder.Services.AddScoped<IForecastService>(sp => sp.GetRequiredService<OpenWeatherService>());
+
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
@@ -20,7 +25,6 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
-
 app.UseAuthorization();
 
 app.MapControllerRoute(
