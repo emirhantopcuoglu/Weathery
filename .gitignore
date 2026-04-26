@@ -3,8 +3,8 @@ appsettings.json
 # Claude Code yerel ayarları
 .claude/
 
-# Tüm wwwroot klasörünü hariç tut
-wwwroot/
+# wwwroot içindeki vendor (bootstrap/jquery) klasörü
+wwwroot/lib/
 
 ## Windows işletim sistemi dosyaları
 Thumbs.db
